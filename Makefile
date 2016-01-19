@@ -1,15 +1,20 @@
 #makefile for project 1 works both in linux and unix system now
-
-.c.o:
-	gcc -g -c $?
+CFLAGS = -Wall -Wextra -pedantic -std=c11 -g
+LDFLAGS = #-lnsl
 
 # compile client and server
 all: client server
 
 # compile client only
 client: client.o  util.o
-	gcc -g -o client client.o  util.o  -lnsl
+	$(CC) $(CFLAGS) -o client client.o  util.o  $(LDFLAGS)
 
 #compile server only
 server: server.o util.o
-	gcc -g -o server server.o util.o  -lnsl
+	$(CC) $(CFLAGS) -o server server.o util.o  $(LDFLAGS)
+
+util.o: util.c
+	$(CC) $(CFLAGS) -c util.c
+
+clean:
+	-rm -f *.o client server

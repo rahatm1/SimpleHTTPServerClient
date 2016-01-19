@@ -18,7 +18,7 @@
  * don't forget to handle errors
  */
 
-main(int argc, char *argv)
+main(int argc, char *argv[])
 {
     char uri[MAX_STR_LEN];
     char hostname[MAX_STR_LEN];
