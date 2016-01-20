@@ -13,6 +13,10 @@
 #include <unistd.h>
 #include "util.h"
 
+#ifndef h_addr
+#define h_addr h_addr_list[0] /* for backward compatibility */
+#endif
+
 /* define maximal string and reply length, this is just an example.*/
 /* MAX_RES_LEN should be defined larger (e.g. 4096) in real testing. */
 #define MAX_STR_LEN 120
