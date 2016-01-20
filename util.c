@@ -5,18 +5,20 @@
 * Instructor: Kui Wu
 -------------------------------*/
 
+#include <unistd.h>
 
 /* ------------
-* util.c: used by client.c and server.c 
+* util.c: used by client.c and server.c
 * ---------------*/
 
 /* write "size" bytes of "ptr" to "sd" */
 
-writen(int sd, char *ptr, int size)
+int writen(int sd, char *ptr, int size)
 {
     int no_left, no_written;
 
-    no_left = size; 
+    no_left = size;
+
     while (no_left > 0)
     {
        no_written = write(sd, ptr, no_left);
@@ -30,7 +32,7 @@ writen(int sd, char *ptr, int size)
 
 /* read "size bytes from "sd" to "ptr" */
 
-readn(int sd, char *ptr, int size)
+int readn(int sd, char *ptr, int size)
 {
    int no_left, no_read;
    no_left = size;
@@ -46,4 +48,3 @@ readn(int sd, char *ptr, int size)
     }
    return(size - no_left);
 }
-

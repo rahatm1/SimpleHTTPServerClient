@@ -3,11 +3,11 @@ CFLAGS = -Wall -Wextra -pedantic -std=c11 -g
 LDFLAGS = #-lnsl
 
 # compile client and server
-all: client server
+all: client #server
 
 # compile client only
 client: client.o  util.o
-	$(CC) $(CFLAGS) -o client client.o  util.o  $(LDFLAGS)
+	$(CC) $(CFLAGS) -o SimpClient client.o  util.o  $(LDFLAGS)
 
 #compile server only
 server: server.o util.o
@@ -17,4 +17,4 @@ util.o: util.c
 	$(CC) $(CFLAGS) -c util.c
 
 clean:
-	-rm -f *.o client server
+	-rm -f *.o SimpClient server
