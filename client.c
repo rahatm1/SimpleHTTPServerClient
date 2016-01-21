@@ -122,7 +122,10 @@ void perform_http(int sockid, char *hostname, char *identifier)
     printf("HTTP request sent, awaiting response...\n\n");
 
 
-    printf("--Response--\n");
+    printf("---Response Header---\n");
+    readn(sockid, response, MAX_RES_LEN);
+    char *tmp = strstr(response, "\r\n\r\n");
+    printf("%.*s\n\n---Response Body--- %s\n", (int) (strlen(response)-strlen(tmp)), response, tmp);
 
     while (readn(sockid, response, MAX_RES_LEN) > 0) {
         printf("%s\n", response);
