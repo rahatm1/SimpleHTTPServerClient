@@ -32,7 +32,7 @@
 
 void parse_URI(char *uri, char *hostname, int *port, char *identifier);
 int open_connection(char *hostname, int port);
-void perform_http(int sockid, char *identifier);
+void perform_http(int sockid, char *hostname, char *identifier);
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
     parse_URI(uri, hostname, &port, identifier);
     sockid = open_connection(hostname, port);
-    perform_http(sockid, identifier);
+    perform_http(sockid, hostname, identifier);
     exit(EXIT_SUCCESS);
 }
 
@@ -72,12 +72,13 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 
     tmp = strtok(NULL, ":/");
 
-    if ( atoi(tmp) > 0 )
+    if ( (tmp != NULL) && (atoi(tmp) > 0))
     {
         *port = atoi(tmp);
-        tmp = strtok(NULL, ":/");
+        tmp = strtok(NULL, " ");
     }
 
+    //TODO: Fix Segmentation Fault here
     if (tmp == NULL)
     {
         strncpy(identifier, "index.html", 11);
@@ -85,6 +86,14 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
     else
     {
         strncpy(identifier, tmp, MAX_STR_LEN-1);
+        tmp = strtok(NULL, ":/");
+
+        while (tmp!=NULL) {
+            strncat(identifier, "/", MAX_STR_LEN-strlen(identifier)-1);
+            strncat(identifier, tmp, MAX_STR_LEN-strlen(identifier)-1);
+            tmp = strtok(NULL, ":/");
+        }
+
     }
 }
 
@@ -92,19 +101,33 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 * connect to a HTTP server using hostname and port,
 * and get the resource specified by identifier
 *--------------------------------------*/
-void perform_http(int sockid, char *identifier)
+void perform_http(int sockid, char *hostname, char *identifier)
 {
     /* connect to server and retrieve response */
 
     char get_request[MAX_STR_LEN];
+    char response[MAX_RES_LEN];
+
     strncpy(get_request, "GET /", MAX_STR_LEN-1);
     strncat(get_request, identifier, MAX_STR_LEN-strlen(get_request) -1);
     strncat(get_request, " HTTP/1.0\r\n\r\n", MAX_STR_LEN-strlen(get_request) -1);
+
+    printf("---Request begin---\n");
+    printf("GET /%s HTTP/1.0\n", identifier);
+    printf("Host: %s\n\n", hostname);
+
     writen(sockid, get_request, sizeof(get_request));
 
-    char response[MAX_RES_LEN];
-    readn(sockid, response, MAX_RES_LEN);
-    printf("%s\n", response);
+    printf("---Request end---\n");
+    printf("HTTP request sent, awaiting response...\n\n");
+
+
+    printf("--Response--\n");
+
+    while (readn(sockid, response, MAX_RES_LEN) > 0) {
+        printf("%s\n", response);
+    }
+
     close(sockid);
 }
 
