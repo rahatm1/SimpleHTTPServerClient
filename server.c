@@ -19,7 +19,8 @@
 
 void cleanExit();
 void perform_http(int newsockfd, char *dir);
-void file_process(char *dir, char *file, char *reply);
+void file_process(int newsockfd, char *dir, char *file);
+void sendResponse(int newsockfd, char *msg);
 
 /*---------------------main() routine--------------------------*
  * tasks for main
@@ -86,7 +87,6 @@ int main(int argc, char *argv[])
         perform_http(newsockfd, dir);
         close(newsockfd);
     }
-    // exit(0);
 }
 
 /*---------------------------------------------------------------------------*
@@ -110,8 +110,6 @@ void perform_http(int newsockfd, char *dir)
 {
     /* If connection is established then start communicating */
     char buffer[MAX_STR_LEN];
-    char reply[MAX_STR_LEN];
-    char file[MAX_STR_LEN];
 
     bzero(buffer,MAX_STR_LEN);
     int n = read(newsockfd,buffer, MAX_STR_LEN-1);
@@ -121,23 +119,23 @@ void perform_http(int newsockfd, char *dir)
        exit(1);
     }
 
-    printf("Request: %s\n",buffer);
-
     char *tmp = strtok(buffer, " ");
 
     if (strncmp(tmp, "GET", 4) == 0)
     {
         tmp = strtok(NULL, " ");
-        strncpy(file, tmp, MAX_STR_LEN);
-        file_process(dir, file, reply);
+        file_process(newsockfd, dir, tmp);
     }
     else
     {
-        strncpy(reply, "HTTP/1.0 501 Not Implemented.\r\n\r\n", 37);
+        sendResponse(newsockfd, "HTTP/1.0 501 Not Implemented.\r\n\r\n");
     }
+}
 
-    /* Write a response to the client */
-    n = writen(newsockfd, reply, strlen(reply));
+/* Write a response to the client */
+void sendResponse(int newsockfd, char *msg)
+{
+    int n = writen(newsockfd, msg, strlen(msg));
 
     if (n < 0) {
        perror("ERROR writing to socket");
@@ -145,25 +143,29 @@ void perform_http(int newsockfd, char *dir)
     }
 }
 
-void file_process(char *dir, char *file, char *reply)
+void file_process(int newsockfd, char *dir, char *file)
 {
     FILE *fp;
-    char buff[256];
+    char *buff = NULL;
+    char path[MAX_STR_LEN];
+    size_t len = 0;
 
-    strncat(dir, file, MAX_STR_LEN-1);
-    printf("%s\n", dir);
-    fp = fopen(dir, "r");
+    strncpy(path, dir, MAX_STR_LEN-1);
+    strncat(path, file, MAX_STR_LEN-1);
+    fp = fopen(path, "r");
 
     if (fp == NULL)
     {
-        strncpy(reply, "HTTP/1.0 404 Not Found.\r\n\r\n", 27);
+        sendResponse(newsockfd, "HTTP/1.0 404 Not Found.\r\n\r\n");
         return;
     }
 
-    //TODO: Finish this
-    fgets(buff, 256, fp);
-    printf("1 : %s\n", buff);
+    sendResponse(newsockfd, "HTTP/1.0 200 OK\r\n\r\n");
 
-    printf("processing files...\n");
+    while ((getline(&buff, &len, fp)) != EOF) {
+        sendResponse(newsockfd, buff);
+    }
+
+    free(buff);
     fclose(fp);
 }

@@ -107,6 +107,9 @@ void perform_http(int sockid, char *hostname, char *identifier)
 
     char get_request[MAX_STR_LEN];
     char response[MAX_RES_LEN];
+    
+    bzero(get_request, MAX_STR_LEN);
+    bzero(response, MAX_STR_LEN);
 
     strncpy(get_request, "GET /", MAX_STR_LEN-1);
     strncat(get_request, identifier, MAX_STR_LEN-strlen(get_request) -1);
