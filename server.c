@@ -4,6 +4,8 @@
 * CSC 361
 * Instructor: Kui Wu
 -------------------------------*/
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize socket structure */
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    memset(&serv_addr, 0, sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -111,7 +113,7 @@ void perform_http(int newsockfd, char *dir)
     /* If connection is established then start communicating */
     char buffer[MAX_STR_LEN];
 
-    bzero(buffer,MAX_STR_LEN);
+    memset(buffer, 0, MAX_STR_LEN);
     int n = read(newsockfd,buffer, MAX_STR_LEN-1);
 
     if (n < 0) {
