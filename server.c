@@ -4,7 +4,9 @@
 * CSC 361
 * Instructor: Kui Wu
 -------------------------------*/
-#define _GNU_SOURCE
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200809L
+#define _POSIX_C_SOURCE 200809L
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
