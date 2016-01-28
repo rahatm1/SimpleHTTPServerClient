@@ -109,7 +109,12 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 void perform_http(int sockid, char *hostname, char *identifier)
 {
     char get_request[MAX_STR_LEN];
-    char response[MAX_RES_LEN];
+    char *response = malloc(MAX_RES_LEN);
+
+    if (response == NULL) {
+        perror("Not Enough memory");
+        exit(1);
+    }
 
     memset(get_request, 0, MAX_STR_LEN);
     memset(response, 0, MAX_STR_LEN);
@@ -140,6 +145,7 @@ void perform_http(int sockid, char *hostname, char *identifier)
         printf("%s\n", response);
     }
 
+    free(response);
     close(sockid);
 }
 
