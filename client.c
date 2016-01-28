@@ -48,7 +48,8 @@ int main(int argc, char *argv[])
     {
         strncpy(uri, argv[1], MAX_STR_LEN-1);
     }
-    else {
+    else
+    {
         printf("Open URI:  ");
         scanf("%s", uri);
     }
@@ -134,7 +135,8 @@ void perform_http(int sockid, char *hostname, char *identifier)
     char *tmp = strstr(response, "\r\n\r\n");
     printf("%.*s\n\n---Response Body--- %s\n", (int) (strlen(response)-strlen(tmp)), response, tmp);
 
-    while (readn(sockid, response, MAX_RES_LEN) > 0) {
+    while (readn(sockid, response, MAX_RES_LEN) > 0)
+    {
         printf("%s\n", response);
     }
 
@@ -158,7 +160,8 @@ int open_connection(char *hostname, int port)
     */
     sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (sockfd == -1) {
+    if (sockfd == -1)
+    {
         fprintf(stderr, "Failed to create socket\n");
         exit(EXIT_FAILURE);
     }
@@ -171,7 +174,8 @@ int open_connection(char *hostname, int port)
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
+    {
         fprintf(stderr, "Socket Connection Failed\n");
         close(sockfd);
         exit(EXIT_FAILURE);

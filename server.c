@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr, cli_addr;
     char dir[MAX_STR_LEN];
 
-    if (argc < 3) {
+    if (argc < 3)
+    {
         perror("Incorrect Arguments");
         exit(1);
     }
@@ -57,7 +58,8 @@ int main(int argc, char *argv[])
     /* First call to socket() function */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (sockfd < 0) {
+    if (sockfd < 0)
+    {
        perror("ERROR opening socket");
        exit(1);
     }
@@ -70,7 +72,8 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(portno);
 
     /* Now bind the host address using bind() call.*/
-    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+    {
        perror("ERROR on binding");
        exit(1);
     }
@@ -86,7 +89,8 @@ int main(int argc, char *argv[])
         /* Accept actual connection from the client */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, (socklen_t *) &clilen);
 
-        if (newsockfd < 0) {
+        if (newsockfd < 0)
+        {
            perror("ERROR on accept");
            exit(1);
         }
@@ -121,7 +125,8 @@ void perform_http(int newsockfd, char *dir)
     /* Read request from socket */
     int n = read(newsockfd,buffer, MAX_STR_LEN-1);
 
-    if (n < 0) {
+    if (n < 0)
+    {
        perror("ERROR reading from socket");
        exit(1);
     }
@@ -147,7 +152,8 @@ void sendResponse(int newsockfd, char *msg)
 {
     int n = writen(newsockfd, msg, strlen(msg));
 
-    if (n < 0) {
+    if (n < 0)
+    {
        perror("ERROR writing to socket");
        exit(1);
     }
@@ -180,7 +186,8 @@ void file_process(int newsockfd, char *dir, char *file)
     sendResponse(newsockfd, "HTTP/1.0 200 OK\r\n\r\n");
 
     /* Send Resource, line by line */
-    while ((getline(&buff, &len, fp)) != EOF) {
+    while ((getline(&buff, &len, fp)) != EOF)
+    {
         sendResponse(newsockfd, buff);
     }
 
