@@ -3,6 +3,8 @@
 * Description: HTTP client program
 * CSC 361
 * Instructor: Kui Wu
+* Developer: Rahat Mahbub
+* Student ID: V00790465
 -------------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,10 +19,14 @@
 #define h_addr h_addr_list[0] /* for backward compatibility */
 #endif
 
-/* define maximal string and reply length, this is just an example.*/
-/* MAX_RES_LEN should be defined larger (e.g. 4096) in real testing. */
+/* maximal string and reply length */
 #define MAX_STR_LEN 120
 #define MAX_RES_LEN 4096
+
+/* Prototypes */
+void parse_URI(char *uri, char *hostname, int *port, char *identifier);
+int open_connection(char *hostname, int port);
+void perform_http(int sockid, char *hostname, char *identifier);
 
 /* --------- Main() routine ------------
  * three main task will be excuted:
@@ -29,10 +35,6 @@
  * use the socket id to connect specified server
  * don't forget to handle errors
  */
-
-void parse_URI(char *uri, char *hostname, int *port, char *identifier);
-int open_connection(char *hostname, int port);
-void perform_http(int sockid, char *hostname, char *identifier);
 
 int main(int argc, char *argv[])
 {
@@ -63,6 +65,7 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 {
     char *tmp = strtok(uri, ":/");
 
+    /* Ignore http tag */
     if (strncmp(tmp, "http", 5) == 0)
     {
         tmp = strtok(NULL, ":/");
@@ -72,13 +75,14 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 
     tmp = strtok(NULL, ":/");
 
+    /* Get Port, if exists */
     if ( (tmp != NULL) && (atoi(tmp) > 0))
     {
         *port = atoi(tmp);
         tmp = strtok(NULL, " ");
     }
 
-    //TODO: Fix Segmentation Fault here
+    /* If resource identifier doesn't exist, add index.html as default */
     if (tmp == NULL)
     {
         strncpy(identifier, "index.html", 11);
@@ -103,14 +107,13 @@ void parse_URI(char *uri, char *hostname, int *port, char *identifier)
 *--------------------------------------*/
 void perform_http(int sockid, char *hostname, char *identifier)
 {
-    /* connect to server and retrieve response */
-
     char get_request[MAX_STR_LEN];
     char response[MAX_RES_LEN];
 
     memset(get_request, 0, MAX_STR_LEN);
     memset(response, 0, MAX_STR_LEN);
 
+    /* Create a GET request */
     strncpy(get_request, "GET /", MAX_STR_LEN-1);
     strncat(get_request, identifier, MAX_STR_LEN-strlen(get_request) -1);
     strncat(get_request, " HTTP/1.0\r\n\r\n", MAX_STR_LEN-strlen(get_request) -1);
@@ -119,12 +122,13 @@ void perform_http(int sockid, char *hostname, char *identifier)
     printf("GET /%s HTTP/1.0\n", identifier);
     printf("Host: %s\n\n", hostname);
 
+    /* Send GET Request to the server */
     writen(sockid, get_request, sizeof(get_request));
 
     printf("---Request end---\n");
     printf("HTTP request sent, awaiting response...\n\n");
 
-
+    /* Receive and print response */
     printf("---Response Header---\n");
     readn(sockid, response, MAX_RES_LEN);
     char *tmp = strstr(response, "\r\n\r\n");
@@ -159,6 +163,7 @@ int open_connection(char *hostname, int port)
         exit(EXIT_FAILURE);
     }
 
+    /* Initialize server_addr structure */
     memset(&server_addr, 0, sizeof(server_addr));
 
     server_ent = gethostbyname(hostname);

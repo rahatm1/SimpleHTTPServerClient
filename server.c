@@ -3,6 +3,8 @@
 * Description: HTTP server program
 * CSC 361
 * Instructor: Kui Wu
+* Developer: Rahat Mahbub
+* Student ID: V00790465
 -------------------------------*/
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200809L
 #define _POSIX_C_SOURCE 200809L
@@ -21,6 +23,7 @@
 
 #define MAX_STR_LEN 120         /* maximum string length */
 
+/* Prototypes */
 void cleanExit();
 void perform_http(int newsockfd, char *dir);
 void file_process(int newsockfd, char *dir, char *file);
@@ -48,6 +51,7 @@ int main(int argc, char *argv[])
     portno = atoi(argv[1]);
     strncpy(dir, argv[2], MAX_STR_LEN-1);
 
+    /* Tries to clean up, if Ctrl+C is pressed */
     signal(SIGINT, cleanExit);
 
     /* First call to socket() function */
@@ -74,7 +78,6 @@ int main(int argc, char *argv[])
     /* Now start listening for the clients, here process will
        * go in sleep mode and will wait for the incoming connection
     */
-
     listen(sockfd,3);
     clilen = sizeof(cli_addr);
 
@@ -112,10 +115,10 @@ void cleanExit()
 
 void perform_http(int newsockfd, char *dir)
 {
-    /* If connection is established then start communicating */
     char buffer[MAX_STR_LEN];
-
     memset(buffer, 0, MAX_STR_LEN);
+
+    /* Read request from socket */
     int n = read(newsockfd,buffer, MAX_STR_LEN-1);
 
     if (n < 0) {
@@ -125,6 +128,7 @@ void perform_http(int newsockfd, char *dir)
 
     char *tmp = strtok(buffer, " ");
 
+    /* Reply right away if the request is not GET */
     if (strncmp(tmp, "GET", 4) == 0)
     {
         tmp = strtok(NULL, " ");
@@ -136,7 +140,9 @@ void perform_http(int newsockfd, char *dir)
     }
 }
 
-/* Write a response to the client */
+/*---------------------------------------------------------------------------*
+ *  Send Given response to the client
+ *---------------------------------------------------------------------------*/
 void sendResponse(int newsockfd, char *msg)
 {
     int n = writen(newsockfd, msg, strlen(msg));
@@ -147,6 +153,10 @@ void sendResponse(int newsockfd, char *msg)
     }
 }
 
+/*---------------------------------------------------------------------------*
+ * If requested resource exists, process and send it.
+ * Otherwise, send 404 Not Found and exit
+ *---------------------------------------------------------------------------*/
 void file_process(int newsockfd, char *dir, char *file)
 {
     FILE *fp;
@@ -154,8 +164,11 @@ void file_process(int newsockfd, char *dir, char *file)
     char path[MAX_STR_LEN];
     size_t len = 0;
 
+    /* Add resource identifier and directory being served
+     * to get path of requested file*/
     strncpy(path, dir, MAX_STR_LEN-1);
     strncat(path, file, MAX_STR_LEN-1);
+
     fp = fopen(path, "r");
 
     if (fp == NULL)
@@ -166,6 +179,7 @@ void file_process(int newsockfd, char *dir, char *file)
 
     sendResponse(newsockfd, "HTTP/1.0 200 OK\r\n\r\n");
 
+    /* Send Resource, line by line */
     while ((getline(&buff, &len, fp)) != EOF) {
         sendResponse(newsockfd, buff);
     }
